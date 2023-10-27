@@ -7,3 +7,7 @@ class User(BaseModel):
     name: str
     age: int
     is_adult: bool
+
+class Feedback(BaseModel):
+    name: str
+    message: str
