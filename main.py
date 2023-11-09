@@ -1,31 +1,32 @@
 from fastapi import FastAPI
-from models import User, Feedback
-
+from models import User, Feedback, UserCreate
+from db import Database
 
 app = FastAPI()
-ls = []
+db = Database()
 
-fake_users = {
-    1: {"username" : "john_doe", "email": "john@example.com"},
-    2: {"username" : "jane_smith", "email": "jane@example.com"}
-}
+@app.post('/user')
+async def check_user_age(user: User):
+    user.is_adult = (user.age >= 18)
+    return user.__dict__
 
-@app.get('/users/{user_id}')
-def read_user(user_id: int):
-    return fake_users.get(user_id, {'error': 'User not found'})
-    # if user_id in fake_users:
-    #     return fake_users[user_id]
-    # return {'error': 'User not found'}
+@app.post('/feedback')
+async def process_feedback(fb: Feedback):
+    db.add_feedback(fb.name, fb.message)
+    return {'message': 'Feedback received. Thanks ' + fb.name}
 
-@app.get('/users/')
-def read_users(limit: int = 10):
-    return dict(list(fake_users.items())[:limit])
+@app.get('/reviews')
+async def show_reviews()
+    all_feedbacks = []
+    for u in db.get_all_reviews():
+        all_feedbacks.append(dict(zip(('name', 'message'), u)))
+    return {'reviews': all_feedbacks}
 
-@app.get('/feedback')
-async def send_fb(feedback: Feedback):
-    ls.append({'name': feedback.name, 'comments': feedback.message})
-    return f'Feedback received. Thank you, {feedback.name}!'
+@app.post('/create_user')
+async def create_user(user: UserCreate):
+    db.add_user(user)
+    return user
 
-@app.get('/comments')
-async def show_fb():
-    return ls
+@app.get('/users')
+async def get_users():
+    return db.get_all_users
